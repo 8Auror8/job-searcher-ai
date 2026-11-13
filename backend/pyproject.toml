@@ -57,7 +57,7 @@ ignore = ["B008"]  # FastAPI Depends() in defaults
 "alembic/**" = ["E501"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"  # same as Docker/CI/production runtime
 strict = true
 plugins = ["pydantic.mypy"]
 exclude = ["alembic/"]
