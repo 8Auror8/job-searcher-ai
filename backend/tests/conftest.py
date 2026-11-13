@@ -22,6 +22,8 @@ from app.core.db import get_session
 from app.core.rate_limit import limiter
 from app.main import create_app
 from app.models import Base
+from app.schemas.cv import CvProfile
+from app.services.cv_extraction import AiUnavailable, ExtractionResult
 from app.services.google_oauth import (
     AuthorizationRequest,
     GoogleIdentity,
@@ -62,9 +64,29 @@ class FakeGoogle:
         return self.identity
 
 
+@dataclass
+class FakeExtractor:
+    model: str = "fake-model"
+    fail: bool = False
+    calls: int = 0
+    profile: CvProfile = field(
+        default_factory=lambda: CvProfile(
+            full_name="Laura Gomez Ruiz",
+            skills=["Python", "FastAPI", "Kubernetes"],  # Kubernetes is NOT in the test CV
+        )
+    )
+
+    async def extract(self, text: str, origin: str) -> ExtractionResult:
+        self.calls += 1
+        if self.fail:
+            raise AiUnavailable()
+        return ExtractionResult(self.profile.model_copy(deep=True), self.model, 100, 50, 5)
+
+
 @pytest.fixture
 def settings() -> Settings:
     return Settings(
+        _env_file=None,  # never read the developer's local .env in tests
         environment="test",
         database_url=TEST_DATABASE_URL,
         frontend_url="http://app.test",
@@ -101,11 +123,17 @@ def google() -> FakeGoogle:
 
 
 @pytest.fixture
+def extractor() -> FakeExtractor:
+    return FakeExtractor()
+
+
+@pytest.fixture
 async def client(
     settings: Settings,
     session_factory: async_sessionmaker[AsyncSession],
     mailer: FakeMailer,
     google: FakeGoogle,
+    extractor: FakeExtractor,
 ) -> AsyncIterator[AsyncClient]:
     app = create_app(settings)
 
@@ -117,6 +145,7 @@ async def client(
     app.dependency_overrides[get_session] = _session
     app.dependency_overrides[deps.get_mailer] = lambda: mailer
     app.dependency_overrides[deps.get_google_client] = lambda: google
+    app.dependency_overrides[deps.get_cv_extractor] = lambda: extractor
     limiter.reset()
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as c:
         yield c

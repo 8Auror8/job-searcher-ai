@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 
-from app.api.routes import auth, health, users
+from app.api.routes import auth, cvs, health, users
 from app.core.config import Settings, get_settings
 from app.core.errors import register_exception_handlers
 from app.core.logging import configure_logging
@@ -29,7 +29,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(RequestContextMiddleware)
 
     register_exception_handlers(app)
-    for router in (health.router, auth.router, users.router):
+    for router in (health.router, auth.router, users.router, cvs.router):
         app.include_router(router, prefix="/api")
     return app
 

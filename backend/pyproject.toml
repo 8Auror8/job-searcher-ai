@@ -4,8 +4,9 @@ version = "0.1.0"
 description = "JobPilot AI - backend API"
 requires-python = ">=3.11"
 dependencies = [
-  "fastapi>=0.115,<0.116",
-  "uvicorn[standard]>=0.34,<0.35",
+  "fastapi>=0.120",
+  "starlette>=1.3.1",  # security fixes (pip-audit)
+  "uvicorn[standard]>=0.34",
   "sqlalchemy[asyncio]>=2.0.40,<2.1",
   "asyncpg>=0.30,<0.31",
   "aiosqlite>=0.21,<0.22",
@@ -17,24 +18,31 @@ dependencies = [
   "httpx>=0.28,<0.29",
   "slowapi>=0.1.9,<0.2",
   "structlog>=25.1,<26",
+  "anthropic>=2.8,<3",
+  "pypdf>=5.1,<7",
+  "python-docx>=1.1,<2",
+  "python-multipart>=0.0.20",
 ]
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=8.3,<9",
-  "pytest-asyncio>=0.25,<1.1",
-  "pytest-cov>=6.0,<7",
+  "pytest>=9.0.3",
+  "pytest-asyncio>=1.2",
+  "pytest-cov>=6.0",
   "ruff>=0.11,<0.12",
-  "mypy>=1.15,<1.17",
+  "mypy>=1.18,<2",
   "pip-audit>=2.7,<3",
 ]
 
 [build-system]
-requires = ["setuptools>=75"]
+requires = ["setuptools>=84.1"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["app*"]
+
+[tool.setuptools.package-data]
+app = ["prompts/*.md"]
 
 [tool.ruff]
 line-length = 100

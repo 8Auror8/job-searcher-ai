@@ -44,7 +44,10 @@ function rawRequest(path: string, init: RequestInit = {}): Promise<Response> {
   const method = (init.method ?? 'GET').toUpperCase();
   const headers = new Headers(init.headers);
   headers.set('Accept', 'application/json');
-  if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+  // FormData sets its own multipart boundary; only JSON strings get a JSON content type.
+  if (typeof init.body === 'string' && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
   if (!SAFE_METHODS.has(method)) {
     const csrf = readCookie('csrf_token');
     if (csrf) headers.set('X-CSRF-Token', csrf);

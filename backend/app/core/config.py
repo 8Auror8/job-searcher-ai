@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     google_client_secret: str = ""
     google_redirect_uri: str = "http://localhost:5173/api/auth/google/callback"
 
+    # AI (Sprint 2+). Without ANTHROPIC_API_KEY the app still works: CV profiles are filled by hand.
+    anthropic_api_key: str = ""
+    ai_model_extraction: str = "claude-haiku-5-5"  # ADR-0001: Haiku for high-volume extraction
+    ai_daily_calls_per_user: int = 20
+
     # Email
     resend_api_key: str = ""
     email_from: str = "JobPilot AI <onboarding@resend.dev>"
@@ -39,6 +44,10 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.environment == "production"
+
+    @property
+    def ai_enabled(self) -> bool:
+        return bool(self.anthropic_api_key)
 
     @property
     def google_enabled(self) -> bool:

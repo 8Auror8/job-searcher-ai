@@ -1,6 +1,9 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { RedirectIfAuthenticated, RequireAuth } from './auth/session';
 import { AppLayout, ComingSoonPage, DashboardPage } from './pages/app';
+import { CvEditorPage } from './pages/cvEditor';
+import { CvsPage } from './pages/cvs';
+import { PreferencesPage } from './pages/preferences';
 import {
   ForgotPasswordPage,
   LoginPage,
@@ -44,7 +47,9 @@ export function App() {
       >
         <Route index element={<DashboardPage />} />
         <Route path="jobs" element={<ComingSoonPage title="Ofertas" />} />
-        <Route path="cvs" element={<ComingSoonPage title="Mis CVs" />} />
+        <Route path="cvs" element={<CvsPage />} />
+        <Route path="cvs/:id" element={<CvEditorPage />} />
+        <Route path="preferences" element={<PreferencesPage />} />
         <Route path="applications" element={<ComingSoonPage title="Candidaturas" />} />
         <Route path="alerts" element={<ComingSoonPage title="Alertas" />} />
         <Route path="stats" element={<ComingSoonPage title="Estadísticas" />} />

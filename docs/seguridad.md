@@ -17,6 +17,13 @@
 | **A09 Registro y monitorización** | Logs JSON con `request_id`. Se registran los logins fallidos y la reutilización de tokens, nunca contraseñas, tokens ni contenido del CV. | ✅ |
 | **A10 SSRF** | La app no descarga URLs que proporcione el usuario. Las APIs de empleo son una lista cerrada de hosts. | Sprint 3 |
 
+### Subida de archivos (Sprint 2)
+- El tipo se detecta por los bytes (`%PDF-`, ZIP con `word/document.xml`), nunca por el nombre ni por el Content-Type.
+- Límites: 5 MB, 20 páginas y 60.000 caracteres de texto. Los DOCX se rechazan si superan 25 MB descomprimidos (bombas zip).
+- Se procesan en memoria y no se guardan; solo se conserva el texto (ADR-0005).
+- Rate limit de 10 subidas por hora y por IP, y cuota de IA de 20 llamadas al día por usuario.
+- Contra la *prompt injection*, el CV va delimitado en `<cv_document>`, se escapa el cierre de la etiqueta y la salida se valida con un esquema. Además, el *grounding* retira los datos que no aparecen en el CV.
+
 ## 2. Modelo de amenazas (STRIDE resumido)
 
 | Amenaza | Ejemplo | Mitigación |

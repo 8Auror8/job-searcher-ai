@@ -3,8 +3,10 @@
 import uuid
 from datetime import datetime
 from enum import StrEnum
+from typing import Any
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Uuid
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text, Uuid
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base, utcnow
@@ -71,4 +73,111 @@ class OneTimeToken(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
-__all__ = ["Base", "OneTimeToken", "RefreshToken", "TokenPurpose", "User"]
+# ── Sprint 2: CVs, preferences, consents, AI usage ─────────────────────
+
+# JSONB on PostgreSQL, JSON elsewhere (SQLite in local dev/tests).
+JsonType = JSON().with_variant(JSONB(), "postgresql")
+
+
+class CvOrigin(StrEnum):
+    UPLOAD = "upload"
+    LINKEDIN_PDF = "linkedin_pdf"
+    MANUAL = "manual"
+    TAILORED = "tailored"  # Sprint 4: version adapted to a job offer
+
+
+class ExtractionStatus(StrEnum):
+    OK = "ok"  # profile extracted by AI
+    MANUAL = "manual"  # filled by the user (no AI or AI disabled)
+    FAILED = "failed"  # AI call failed; user can retry or edit by hand
+
+
+class CvVersion(Base):
+    """One version of the user's CV. The original file is NOT stored (data minimisation,
+    ADR-0005): only the extracted plain text and the structured profile."""
+
+    __tablename__ = "cv_versions"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    name: Mapped[str] = mapped_column(String(100))
+    origin: Mapped[str] = mapped_column(String(20))
+    is_primary: Mapped[bool] = mapped_column(Boolean, default=False)
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    source_text: Mapped[str | None] = mapped_column(Text)
+    profile: Mapped[dict[str, Any]] = mapped_column(JsonType, default=dict)
+    extraction_status: Mapped[str] = mapped_column(String(20))
+    extraction_notes: Mapped[dict[str, Any]] = mapped_column(JsonType, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow
+    )
+
+
+class Preferences(Base):
+    __tablename__ = "preferences"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    data: Mapped[dict[str, Any]] = mapped_column(JsonType, default=dict)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow
+    )
+
+
+class ConsentKind(StrEnum):
+    CV_PROCESSING = "cv_processing"
+
+
+class Consent(Base):
+    """GDPR art. 7: we must be able to prove when and to which policy version consent was given."""
+
+    __tablename__ = "consents"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    kind: Mapped[str] = mapped_column(String(40))
+    policy_version: Mapped[str] = mapped_column(String(20))
+    granted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class AiUsage(Base):
+    """One row per LLM call: cost/latency observability (RNF-10) and per-user quotas (RNF-05)."""
+
+    __tablename__ = "ai_usage"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    feature: Mapped[str] = mapped_column(String(40))
+    model: Mapped[str] = mapped_column(String(60))
+    input_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    output_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    latency_ms: Mapped[int] = mapped_column(Integer, default=0)
+    success: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, index=True
+    )
+
+
+__all__ = [
+    "AiUsage",
+    "Base",
+    "Consent",
+    "ConsentKind",
+    "CvOrigin",
+    "CvVersion",
+    "ExtractionStatus",
+    "OneTimeToken",
+    "Preferences",
+    "RefreshToken",
+    "TokenPurpose",
+    "User",
+]

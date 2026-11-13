@@ -2,7 +2,7 @@
 
 > Tu copiloto de búsqueda de empleo: sube tu CV o tu perfil de LinkedIn y la IA encuentra las ofertas que encajan contigo, te explica por qué y te deja cada candidatura preparada a un clic de la oferta original.
 
-![Estado](https://img.shields.io/badge/estado-Sprint%201%20%C2%B7%20base%20y%20auth-blue)
+![Estado](https://img.shields.io/badge/estado-Sprint%202%20%C2%B7%20CV%20e%20IA-blue)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-green)
 
 Trabajo de Fin de Máster sobre **desarrollo de software con IA**. La IA está **dentro del producto** (análisis del CV, matching, preparación de candidaturas y sugerencias) y **en el proceso de desarrollo** (ver el [registro de desarrollo con IA](docs/ai-dev-log.md)).
@@ -115,13 +115,13 @@ jobpilot-ai/
 └── README.md
 ```
 
-> Sprint 1: existen `backend/` (autenticación completa), `frontend/` (login, registro, recuperación y panel vacío) y `docs/`. Las carpetas `eval/`, `prompts/` y `e2e/` llegan en los siguientes sprints.
+> Sprint 2: existen `backend/` (autenticación, CVs, extracción con IA y preferencias), `frontend/` y `docs/`. Las carpetas `eval/` y `e2e/` llegan en los siguientes sprints.
 
 ## Instalación y ejecución
 
 **Requisitos:** Python 3.11+ y Node 20+. Docker es opcional.
 
-Las claves de API (Anthropic, Voyage, Adzuna) solo hacen falta a partir del Sprint 2. Google OAuth y Resend son opcionales: sin Resend, los emails (por ejemplo, el enlace de verificación) se escriben en el log de la API.
+Sin `ANTHROPIC_API_KEY` la app funciona, pero el perfil del CV se rellena a mano. Con la clave, Claude lo extrae automáticamente. Las claves de Voyage y Adzuna llegan en el Sprint 3. Google OAuth y Resend son opcionales: sin Resend, los emails (por ejemplo, el enlace de verificación) se escriben en el log de la API.
 
 ### Opción A: con Docker
 
@@ -171,9 +171,9 @@ Con cualquiera de las dos opciones:
 | End-to-end | Playwright | Sprint 6 |
 | Evaluación de la IA | Script propio | Sprints 3 y 4 |
 
-**Estado actual (Sprint 1):**
-- Backend: 30 tests, 92 % de cobertura.
-- Frontend: 13 tests.
+**Estado actual (Sprint 2):**
+- Backend: 59 tests, 94 % de cobertura.
+- Frontend: 18 tests.
 - La CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) exige cobertura ≥ 70 %, que las migraciones funcionen sobre PostgreSQL y una auditoría de dependencias sin vulnerabilidades.
 
 ## Seguridad y legalidad
@@ -206,14 +206,14 @@ Más detalle en [docs/legal.md](docs/legal.md) y, desde el Sprint 1, en `docs/se
 | [docs/seguridad.md](docs/seguridad.md) | OWASP Top 10, modelo de amenazas y gestión de secretos |
 | [docs/legal.md](docs/legal.md) | Revisión de las condiciones de uso de cada fuente y RGPD |
 | [docs/backlog.md](docs/backlog.md) | Calendario, épicas, historias de usuario y definición de terminado |
-| [docs/adr/](docs/adr/) | Registros de decisiones de arquitectura |
+| [docs/adr/](docs/adr/) | Registros de decisiones de arquitectura (stack, sin envío automático, sesión, procesamiento del CV) |
 | [docs/ai-dev-log.md](docs/ai-dev-log.md) | Registro del desarrollo asistido por IA |
 
 ## Hoja de ruta
 
 - [x] **Sprint 0** · Análisis, revisión legal y backlog
 - [x] **Sprint 1** · Diseño, repositorio, CI y autenticación (despliegue pendiente de cuentas)
-- [ ] **Sprint 2** · CV, versiones e importación de LinkedIn
+- [x] **Sprint 2** · CV, versiones e importación de LinkedIn
 - [ ] **Sprint 3** · Ofertas y matching
 - [ ] **Sprint 4** · Preparación de candidaturas y evaluación de la IA
 - [ ] **Sprint 5** · Alertas, estadísticas y sugerencias

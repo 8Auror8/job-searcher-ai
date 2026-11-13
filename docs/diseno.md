@@ -145,6 +145,24 @@ Todas las rutas cuelgan de `/api`. Los errores siguen un formato único: `{"erro
 | GET | `/auth/google/callback` | — | Valida `state`, intercambia el código, verifica el `id_token` y crea la sesión |
 | GET | `/users/me` | sesión | Usuario actual |
 
+### API del Sprint 2 (CVs y preferencias)
+
+Todas estas rutas requieren sesión y filtran por el usuario autenticado. Si alguien pide un recurso de otro usuario, la respuesta es 404, igual que si no existiera.
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/cvs?include_archived=` | Lista de versiones del CV (la principal primero) |
+| POST | `/cvs` (multipart) | Sube un PDF/DOCX o el PDF de LinkedIn (`origin=upload\|linkedin_pdf`, `consent`, `name`). Extrae el texto, analiza con IA y aplica el *grounding* ([ADR-0005](adr/0005-procesamiento-de-cv.md)) |
+| POST | `/cvs/blank` | Crea una versión vacía para rellenar a mano |
+| GET | `/cvs/{id}` | Versión con su perfil y las notas de extracción (datos no verificados, modelo, versión del prompt) |
+| PATCH | `/cvs/{id}` | Renombra, marca como principal o archiva/restaura |
+| PUT | `/cvs/{id}/profile` | Guarda el perfil editado por el usuario |
+| POST | `/cvs/{id}/extract` | Vuelve a analizar con IA (con cuota diaria) |
+| DELETE | `/cvs/{id}` | Borra la versión; si era la principal, otra pasa a serlo |
+| GET/PUT | `/preferences` | Preferencias de búsqueda (puestos, ubicaciones, modalidad, salario, fuentes) |
+
+**Cambio respecto al ERD:** el perfil se guarda como columna JSON (`cv_versions.profile`) en lugar de en una tabla `cv_profiles` aparte. La relación es 1 a 1, siempre se lee junto a la versión y su forma la valida Pydantic (`CvProfile`). Tablas nuevas: `cv_versions`, `preferences`, `consents` y `ai_usage`.
+
 La documentación interactiva (OpenAPI) se genera sola en `/api/docs` (desactivada en producción).
 
 ## 4. Flujos principales

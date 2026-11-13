@@ -13,6 +13,7 @@ from app.core.middleware import ACCESS_COOKIE
 from app.core.security import decode_access_token
 from app.models import User
 from app.services.auth_service import AuthService
+from app.services.cv_extraction import ClaudeCvExtractor, CvExtractor
 from app.services.google_oauth import GoogleClient, GoogleOAuth
 from app.services.mailer import ConsoleMailer, Mailer, ResendMailer
 
@@ -55,3 +56,15 @@ async def get_current_user(
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+@lru_cache
+def _build_extractor(api_key: str, model: str) -> CvExtractor:
+    # One shared client (connection pool) per key/model, not one per request.
+    return ClaudeCvExtractor(Settings(anthropic_api_key=api_key, ai_model_extraction=model))
+
+
+def get_cv_extractor(settings: SettingsDep) -> CvExtractor | None:
+    if not settings.ai_enabled:
+        return None
+    return _build_extractor(settings.anthropic_api_key, settings.ai_model_extraction)

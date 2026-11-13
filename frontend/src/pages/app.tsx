@@ -4,7 +4,8 @@ import { useCurrentUser, useLogout } from '../auth/hooks';
 const NAV = [
   { to: '/app', label: 'Inicio', end: true },
   { to: '/app/jobs', label: 'Ofertas', soon: 'Sprint 3' },
-  { to: '/app/cvs', label: 'Mis CVs', soon: 'Sprint 2' },
+  { to: '/app/cvs', label: 'Mis CVs' },
+  { to: '/app/preferences', label: 'Preferencias' },
   { to: '/app/applications', label: 'Candidaturas', soon: 'Sprint 4' },
   { to: '/app/alerts', label: 'Alertas', soon: 'Sprint 5' },
   { to: '/app/stats', label: 'Estadísticas', soon: 'Sprint 5' },
@@ -70,7 +71,18 @@ export function DashboardPage() {
       <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
         <h2 className="font-semibold">Primeros pasos</h2>
         <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-slate-700">
-          <li>Sube tu CV o el PDF de tu perfil de LinkedIn (próximamente).</li>
+          <li>
+            <Link className="text-brand-600 underline" to="/app/cvs">
+              Sube tu CV o el PDF de tu perfil de LinkedIn
+            </Link>
+            .
+          </li>
+          <li>
+            <Link className="text-brand-600 underline" to="/app/preferences">
+              Indica qué tipo de puesto buscas
+            </Link>
+            .
+          </li>
           <li>Revisa las ofertas que mejor encajan contigo.</li>
           <li>Prepara tu candidatura con IA y envíala en la web de la oferta.</li>
         </ol>

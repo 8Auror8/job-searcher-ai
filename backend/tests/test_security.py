@@ -53,12 +53,14 @@ def test_password_hashing() -> None:
 
 
 def test_access_token_roundtrip_and_rejections() -> None:
-    settings = Settings(environment="test")
+    settings = Settings(_env_file=None, environment="test")
     user_id = uuid.uuid4()
     token = security.create_access_token(user_id, settings)
     assert security.decode_access_token(token, settings) == user_id
 
-    other = Settings(environment="test", jwt_secret="another-secret-that-is-long-enough-123")
+    other = Settings(
+        _env_file=None, environment="test", jwt_secret="another-secret-that-is-long-enough-123"
+    )
     assert security.decode_access_token(token, other) is None
 
     expired = jwt.encode(
@@ -77,7 +79,7 @@ def test_access_token_roundtrip_and_rejections() -> None:
 
 
 def test_oauth_state_roundtrip() -> None:
-    settings = Settings(environment="test")
+    settings = Settings(_env_file=None, environment="test")
     signed = security.sign_state({"state": "s", "verifier": "v"}, settings)
     assert security.read_state(signed, settings) == {"state": "s", "verifier": "v"}
     assert security.read_state("garbage", settings) is None
@@ -85,10 +87,10 @@ def test_oauth_state_roundtrip() -> None:
 
 def test_production_settings_are_validated() -> None:
     with pytest.raises(ValueError, match="JWT_SECRET"):
-        Settings(environment="production", cookie_secure=True)
+        Settings(_env_file=None, environment="production", cookie_secure=True)
     with pytest.raises(ValueError, match="COOKIE_SECURE"):
-        Settings(environment="production", jwt_secret="x" * 40, cookie_secure=False)
-    ok = Settings(environment="production", jwt_secret="x" * 40, cookie_secure=True)
+        Settings(_env_file=None, environment="production", jwt_secret="x" * 40, cookie_secure=False)
+    ok = Settings(_env_file=None, environment="production", jwt_secret="x" * 40, cookie_secure=True)
     assert ok.is_production
 
 

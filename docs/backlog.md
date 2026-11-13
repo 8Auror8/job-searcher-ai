@@ -9,7 +9,7 @@
 |---|---|---|---|
 | 0. Análisis | 1 | 09/11 – 13/11/2026 | Requisitos, revisión legal y backlog ✅ |
 | 1. Diseño y base | 2–3 | 16/11 – 27/11/2026 | Diseño, repositorio, CI, auth y primer despliegue ✅ (falta el despliegue: requiere cuentas) |
-| 2. CV + versiones + LinkedIn | 4–5 | 30/11 – 11/12/2026 | Subida, importación de LinkedIn, parsing, perfil y versiones |
+| 2. CV + versiones + LinkedIn | 4–5 | 30/11 – 11/12/2026 | Subida, importación de LinkedIn, parsing, perfil y versiones ✅ (falta probar la extracción con una clave real de Anthropic) |
 | 3. Ofertas + matching | 6–7 | 14/12 – 25/12/2026 | Fuentes, embeddings, puntuación y panel |
 | 4. Preparación de candidaturas + evaluación de la IA | 8–9 | 28/12/2026 – 08/01/2027 | Cartas, respuestas al formulario, CV adaptado, seguimiento y evaluación rigurosa de la IA |
 | 5. Alertas + estadísticas + sugerencias | 10–12 | 11/01 – 29/01/2027 | Alertas diarias, estadísticas y mejora del CV |

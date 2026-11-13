@@ -95,7 +95,9 @@ async def test_google_disabled_returns_404(client: AsyncClient) -> None:
 
     app = client._transport.app  # type: ignore[attr-defined]
     del app.dependency_overrides[deps.get_google_client]
-    app.dependency_overrides[deps.get_settings] = lambda: deps.Settings(environment="test")
+    app.dependency_overrides[deps.get_settings] = lambda: deps.Settings(
+        _env_file=None, environment="test"
+    )
     resp = await client.get("/api/auth/google/login")
     assert resp.status_code == 404
     assert resp.json()["error"]["code"] == "feature_disabled"

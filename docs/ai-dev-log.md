@@ -89,3 +89,21 @@ Este registro alimenta el capítulo de la memoria sobre **la IA en el proceso de
 - **Decisión de seguridad propuesta por la IA:** defensa contra el *pre-hijacking* de cuentas. Si alguien registra un email ajeno sin verificarlo y el dueño real entra después con Google, se borra la contraseña no verificada. Hay un test específico.
 - **Resultado:** backend con 30 tests y 92 % de cobertura (ruff y mypy estricto sin errores); frontend con 13 tests (lint, tipado y build en verde; 0 vulnerabilidades en producción).
 - **Pendiente humano:** crear las cuentas de Neon, Render, Vercel y Google Cloud para el despliegue (HU-003).
+
+### 13/11/2026 · Sprint 2 · CV, importación de LinkedIn y extracción con IA
+- **Objetivo:** épica E2 (HU-201 a HU-206): subir el CV o el PDF de LinkedIn, extraer el perfil con IA, editarlo, gestionar versiones y preferencias.
+- **Qué hizo la IA:**
+  - Consultó la guía oficial del SDK de Anthropic antes de escribir código, para usar salidas estructuradas (`messages.parse` con Pydantic) en lugar de recordar APIs que podrían estar obsoletas.
+  - Diseñó la comprobación de anclaje (*grounding*), que retira del perfil todo lo que la IA proponga y no aparezca literalmente en el CV.
+  - Escribió la ADR-0005, el backend (lectura segura de PDF/DOCX, servicio de CVs, cuotas de IA, consentimientos), el frontend (subida con arrastrar y soltar, instrucciones de LinkedIn, editor de perfil, versiones, preferencias) y los tests.
+  - Verificó el flujo en el navegador: subida → editor → guardado → recarga → preferencias.
+- **Errores detectados y corregidos:**
+  1. La migración autogenerada por Alembic usaba `Text()` sin importarlo; se vio al probar la migración en ambos sentidos.
+  2. La IA escribió un espacio de no separación literal dentro de una expresión regular; ruff lo detectó (RUF001) y se sustituyó por `\xa0`.
+  3. mypy 1.16 fallaba internamente con el SDK de Anthropic 2.x; se actualizó a mypy 1.18 o superior.
+  4. Los tests leían el `.env` local del desarrollador, y un test de seguridad dejó de fallar cuando debía. Se aislaron con `_env_file=None`. Era un fallo real del entorno de pruebas, no del código.
+  5. En la prueba en navegador, el botón "Volver a analizar con IA" aparecía aunque la IA no estuviera configurada; se ocultó en ese caso.
+  6. `pip-audit` detectó vulnerabilidades conocidas en Starlette 0.46, la base de FastAPI. Llegaba fijada por el límite `fastapi<0.116` que la propia IA puso en el Sprint 1. Se actualizó a FastAPI 0.162 y Starlette 1.10, además de pytest y setuptools (solo desarrollo). La auditoría queda sin vulnerabilidades y los 59 tests pasan sin cambios. **Lección:** fijar versiones con techo protege la estabilidad, pero hay que auditarlas en cada sprint, no solo en la CI.
+- **Decisión sobre el modelo:** se usa `claude-haiku-5-5` para la extracción, según el planning aprobado (ADR-0001, presupuesto menor de 10 €/mes). Se puede cambiar con `AI_MODEL_EXTRACTION`.
+- **Resultado:** backend con 59 tests y 94 % de cobertura; frontend con 18 tests; 0 vulnerabilidades.
+- **Pendiente:** probar la extracción con una clave real de Anthropic y medir la precisión (OE1, ≥ 90 %) con el conjunto de evaluación del Sprint 3.
